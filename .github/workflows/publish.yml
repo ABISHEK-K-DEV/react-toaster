@@ -48,9 +48,26 @@ jobs:
           echo "Error: dist/ directory not found after build"
           exit 1
         fi
+        
+    - name: Configure npm authentication
+      run: |
+        echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+        echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+        echo "access=public" >> ~/.npmrc
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+    - name: Verify npm authentication
+      run: |
+        echo "Checking npm authentication..."
+        npm whoami
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
     - name: Publish to npm
-      run: npm publish --access public
+      run: |
+        echo "Publishing package..."
+        npm publish --access public --verbose
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         
