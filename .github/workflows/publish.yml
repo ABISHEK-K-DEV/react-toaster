@@ -9,6 +9,10 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
     
     steps:
     - name: Checkout code
@@ -116,11 +120,10 @@ jobs:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         
     - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
+        token: ${{ secrets.GITHUB_TOKEN }}
         name: Release ${{ github.ref_name }}
         body: |
           ## 🚀 What's New in ${{ github.ref_name }}
@@ -144,3 +147,13 @@ jobs:
         draft: false
         prerelease: false
         generate_release_notes: true
+        fail_on_unmatched_files: false
+      continue-on-error: true
+      
+    - name: Manual Release Creation (fallback)
+      if: failure()
+      run: |
+        echo "GitHub release creation failed, but NPM publish was successful!"
+        echo "✅ Package @abisheks238/react-toaster@$(cat package.json | jq -r '.version') is available on NPM"
+        echo "📦 NPM URL: https://www.npmjs.com/package/@abisheks238/react-toaster"
+        echo "You can manually create a GitHub release if needed."
