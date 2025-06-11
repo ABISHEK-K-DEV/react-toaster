@@ -1,6 +1,6 @@
 {
   "name": "@abisheks238/react-toaster",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "An advanced, customizable toast notification system for React with smart queue, swipe support, and theming",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -13,7 +13,8 @@
   "scripts": {
     "build": "rollup -c",
     "test": "jest",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "version-check": "echo \"Current version: $(node -p \\\"require('./package.json').version\\\")\""
   },
   "keywords": [
     "react",
