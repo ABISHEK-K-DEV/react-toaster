@@ -70,6 +70,21 @@ jobs:
         cat package.json | jq '.name, .version, .main, .types'
         echo "Files to be published:"
         npm pack --dry-run
+        
+        # Check if this version already exists on NPM
+        PACKAGE_NAME=$(cat package.json | jq -r '.name')
+        PACKAGE_VERSION=$(cat package.json | jq -r '.version')
+        echo "Checking if version $PACKAGE_VERSION already exists..."
+        
+        if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version 2>/dev/null; then
+          echo "❌ Version $PACKAGE_VERSION already exists on NPM!"
+          echo "Please increment the version in package.json before publishing."
+          echo "Current published versions:"
+          npm view "$PACKAGE_NAME" versions --json
+          exit 1
+        else
+          echo "✅ Version $PACKAGE_VERSION is new, proceeding with publish"
+        fi
       
     - name: Publish to npm
       run: |
@@ -81,20 +96,22 @@ jobs:
     - name: Verify NPM publication
       run: |
         echo "Waiting for NPM to process the package..."
-        sleep 30
+        sleep 10
         PACKAGE_NAME=$(cat package.json | jq -r '.name')
         PACKAGE_VERSION=$(cat package.json | jq -r '.version')
         echo "Checking if package $PACKAGE_NAME@$PACKAGE_VERSION is available..."
         
-        # Try to fetch package info from NPM
-        if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version; then
-          echo "✅ Package successfully published to NPM"
-          echo "📦 NPM URL: https://www.npmjs.com/package/$PACKAGE_NAME"
-        else
-          echo "❌ Package not found on NPM registry"
-          echo "Trying to check latest version..."
-          npm view "$PACKAGE_NAME" versions --json || echo "Package not found at all"
-        fi
+        # Try to fetch package info from NPM with retries
+        for i in {1..3}; do
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version; then
+            echo "✅ Package successfully published to NPM"
+            echo "📦 NPM URL: https://www.npmjs.com/package/$PACKAGE_NAME"
+            break
+          else
+            echo "Attempt $i: Package not yet available, waiting..."
+            sleep 15
+          fi
+        done
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         

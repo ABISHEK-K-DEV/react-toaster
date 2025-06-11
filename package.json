@@ -1,6 +1,6 @@
 {
   "name": "@abisheks238/react-toaster",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "description": "An advanced, customizable toast notification system for React with smart queue, swipe support, and theming",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
