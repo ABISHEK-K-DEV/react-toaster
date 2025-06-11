@@ -85,7 +85,8 @@ jobs:
           - 🔗 Package available at: https://www.npmjs.com/package/@abisheks238/react-toaster
           - 📚 Updated documentation and examples
           - 🐛 Bug fixes and improvements
-          - ⚡ Fixed PostCSS ES module configuration
+          - ⚡ Fixed PostCSS ES module configuration issue
+          - 🔧 Resolved build process compatibility with ES modules
           
           ## 📦 Installation
           
