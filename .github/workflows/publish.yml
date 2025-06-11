@@ -64,10 +64,37 @@ jobs:
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
+    - name: Check package details before publishing
+      run: |
+        echo "Package details:"
+        cat package.json | jq '.name, .version, .main, .types'
+        echo "Files to be published:"
+        npm pack --dry-run
+      
     - name: Publish to npm
       run: |
         echo "Publishing package..."
         npm publish --access public --verbose
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        
+    - name: Verify NPM publication
+      run: |
+        echo "Waiting for NPM to process the package..."
+        sleep 30
+        PACKAGE_NAME=$(cat package.json | jq -r '.name')
+        PACKAGE_VERSION=$(cat package.json | jq -r '.version')
+        echo "Checking if package $PACKAGE_NAME@$PACKAGE_VERSION is available..."
+        
+        # Try to fetch package info from NPM
+        if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version; then
+          echo "✅ Package successfully published to NPM"
+          echo "📦 NPM URL: https://www.npmjs.com/package/$PACKAGE_NAME"
+        else
+          echo "❌ Package not found on NPM registry"
+          echo "Trying to check latest version..."
+          npm view "$PACKAGE_NAME" versions --json || echo "Package not found at all"
+        fi
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         
@@ -85,9 +112,6 @@ jobs:
           - 🔗 Package available at: https://www.npmjs.com/package/@abisheks238/react-toaster
           - 📚 Updated documentation and examples
           - 🐛 Bug fixes and improvements
-          - ⚡ Fixed PostCSS ES module configuration issue
-          - 🔧 Resolved build process compatibility with ES modules
-          - 🎯 Removed problematic postpublish script for CI/CD compatibility
           
           ## 📦 Installation
           
