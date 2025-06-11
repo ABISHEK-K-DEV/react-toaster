@@ -34,7 +34,20 @@ jobs:
         fi
       
     - name: Build package
-      run: npm run build
+      run: |
+        echo "Building package..."
+        npm run build
+        echo "Build completed successfully"
+      
+    - name: Check build output
+      run: |
+        if [ -d "dist" ]; then
+          echo "Build output found in dist/"
+          ls -la dist/
+        else
+          echo "Error: dist/ directory not found after build"
+          exit 1
+        fi
       
     - name: Publish to npm
       run: npm publish --access public
@@ -55,6 +68,7 @@ jobs:
           - 🔗 Package available at: https://www.npmjs.com/package/@abisheks238/react-toaster
           - 📚 Updated documentation and examples
           - 🐛 Bug fixes and improvements
+          - ⚡ Fixed PostCSS ES module configuration
           
           ## 📦 Installation
           
