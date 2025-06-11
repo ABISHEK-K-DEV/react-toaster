@@ -32,20 +32,30 @@ jobs:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         
     - name: Create GitHub Release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        name: Release ${{ github.ref_name }}
         body: |
-          ## What's Changed
-          - Published to npm registry
-          - Package available at: https://www.npmjs.com/package/@abisheks238/react-toaster
+          ## 🚀 What's New in ${{ github.ref_name }}
           
-          ## Installation
+          - 📦 Published to npm registry
+          - 🔗 Package available at: https://www.npmjs.com/package/@abisheks238/react-toaster
+          - 📚 Updated documentation and examples
+          
+          ## 📦 Installation
+          
           ```bash
           npm install @abisheks238/react-toaster
           ```
+          
+          ## 🔗 Links
+          
+          - [📦 NPM Package](https://www.npmjs.com/package/@abisheks238/react-toaster)
+          - [📚 Documentation](https://github.com/ABISHEK-K-DEV/react-toaster#readme)
+          - [🐛 Report Issues](https://github.com/ABISHEK-K-DEV/react-toaster/issues)
         draft: false
         prerelease: false
+        generate_release_notes: true
