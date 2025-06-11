@@ -81,12 +81,13 @@ jobs:
         body: |
           ## 🚀 What's New in ${{ github.ref_name }}
           
-          - 📦 Published to npm registry
+          - ✅ Successfully published to npm registry
           - 🔗 Package available at: https://www.npmjs.com/package/@abisheks238/react-toaster
           - 📚 Updated documentation and examples
           - 🐛 Bug fixes and improvements
           - ⚡ Fixed PostCSS ES module configuration issue
           - 🔧 Resolved build process compatibility with ES modules
+          - 🎯 Removed problematic postpublish script for CI/CD compatibility
           
           ## 📦 Installation
           
