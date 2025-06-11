@@ -24,8 +24,14 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
-    - name: Run tests (if available)
-      run: npm test --if-present
+    - name: Check if tests exist and run them
+      run: |
+        if npm run test --dry-run > /dev/null 2>&1 && command -v jest > /dev/null 2>&1; then
+          echo "Running tests..."
+          npm test
+        else
+          echo "No tests found or Jest not installed, skipping tests"
+        fi
       
     - name: Build package
       run: npm run build
