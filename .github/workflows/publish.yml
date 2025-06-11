@@ -19,15 +19,19 @@ jobs:
       with:
         node-version: '18'
         registry-url: 'https://registry.npmjs.org'
+        cache: 'npm'
         
     - name: Install dependencies
       run: npm ci
+      
+    - name: Run tests (if available)
+      run: npm test --if-present
       
     - name: Build package
       run: npm run build
       
     - name: Publish to npm
-      run: npm publish
+      run: npm publish --access public
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         
@@ -44,6 +48,7 @@ jobs:
           - 📦 Published to npm registry
           - 🔗 Package available at: https://www.npmjs.com/package/@abisheks238/react-toaster
           - 📚 Updated documentation and examples
+          - 🐛 Bug fixes and improvements
           
           ## 📦 Installation
           
