@@ -1,102 +1,77 @@
 import { useRef, useCallback } from 'react';
+import { SwipeConfig } from '../types';
 
 interface SwipeHandlers {
-  onSwipeStart?: (e: TouchEvent | MouseEvent) => void;
-  onSwipeMove?: (progress: number, e: TouchEvent | MouseEvent) => void;
-  onSwipeEnd?: (dismissed: boolean, e: TouchEvent | MouseEvent) => void;
-}
-
-interface SwipeConfig {
-  threshold: number;
-  velocity: number;
-  enabled: boolean;
+  onSwipeStart: () => void;
+  onSwipeMove: (progress: number, event: TouchEvent | MouseEvent) => void;
+  onSwipeEnd: (dismissed: boolean) => void;
 }
 
 export const useSwipeGesture = (
   config: SwipeConfig,
   handlers: SwipeHandlers
 ) => {
-  const startX = useRef(0);
-  const startY = useRef(0);
-  const currentX = useRef(0);
-  const startTime = useRef(0);
-  const isDragging = useRef(false);
+  const startX = useRef<number>(0);
+  const currentX = useRef<number>(0);
+  const isDragging = useRef<boolean>(false);
+  const startTime = useRef<number>(0);
 
-  const handleStart = useCallback((e: TouchEvent | MouseEvent) => {
+  const handleStart = useCallback((clientX: number) => {
     if (!config.enabled) return;
 
-    try {
-      const clientX = 'touches' in e ? e.touches[0]?.clientX : e.clientX;
-      const clientY = 'touches' in e ? e.touches[0]?.clientY : e.clientY;
-
-      if (clientX === undefined || clientY === undefined) return;
-
-      startX.current = clientX;
-      startY.current = clientY;
-      currentX.current = clientX;
-      startTime.current = Date.now();
-      isDragging.current = true;
-
-      handlers.onSwipeStart?.(e);
-    } catch (error) {
-      // Handle potential touch event errors
-      isDragging.current = false;
-    }
+    startX.current = clientX;
+    currentX.current = clientX;
+    isDragging.current = true;
+    startTime.current = Date.now();
+    handlers.onSwipeStart();
   }, [config.enabled, handlers]);
 
-  const handleMove = useCallback((e: TouchEvent | MouseEvent) => {
+  const handleMove = useCallback((clientX: number, event: TouchEvent | MouseEvent) => {
     if (!isDragging.current || !config.enabled) return;
 
-    try {
-      const clientX = 'touches' in e ? e.touches[0]?.clientX : e.clientX;
-      const clientY = 'touches' in e ? e.touches[0]?.clientY : e.clientY;
+    currentX.current = clientX;
+    const deltaX = clientX - startX.current;
+    const progress = Math.abs(deltaX) / config.threshold;
 
-      if (clientX === undefined || clientY === undefined) return;
+    handlers.onSwipeMove(progress, event);
+  }, [config.enabled, config.threshold, handlers]);
 
-      const deltaX = clientX - startX.current;
-      const deltaY = clientY - startY.current;
-
-      // Prevent vertical scrolling interference
-      if (Math.abs(deltaY) > Math.abs(deltaX)) {
-        isDragging.current = false;
-        return;
-      }
-
-      currentX.current = clientX;
-      const progress = Math.abs(deltaX) / config.threshold;
-
-      handlers.onSwipeMove?.(Math.min(progress, 1), e);
-
-      // Prevent default to avoid scrolling
-      e.preventDefault();
-    } catch (error) {
-      isDragging.current = false;
-    }
-  }, [config, handlers]);
-
-  const handleEnd = useCallback((e: TouchEvent | MouseEvent) => {
+  const handleEnd = useCallback(() => {
     if (!isDragging.current || !config.enabled) return;
 
     const deltaX = currentX.current - startX.current;
     const deltaTime = Date.now() - startTime.current;
     const velocity = Math.abs(deltaX) / deltaTime;
 
-    const dismissed = Math.abs(deltaX) >= config.threshold || velocity >= config.velocity;
-
-    handlers.onSwipeEnd?.(dismissed, e);
+    const shouldDismiss =
+      Math.abs(deltaX) > config.threshold ||
+      velocity > config.velocity;
 
     isDragging.current = false;
-  }, [config, handlers]);
+    handlers.onSwipeEnd(shouldDismiss);
+  }, [config.enabled, config.threshold, config.velocity, handlers]);
 
   const touchHandlers = {
-    onTouchStart: handleStart,
-    onTouchMove: handleMove,
+    onTouchStart: (e: React.TouchEvent) => {
+      if (e.touches.length === 1) {
+        handleStart(e.touches[0].clientX);
+      }
+    },
+    onTouchMove: (e: React.TouchEvent) => {
+      if (e.touches.length === 1) {
+        handleMove(e.touches[0].clientX, e.nativeEvent);
+      }
+    },
     onTouchEnd: handleEnd,
   };
 
   const mouseHandlers = {
-    onMouseDown: handleStart,
-    onMouseMove: handleMove,
+    onMouseDown: (e: React.MouseEvent) => {
+      handleStart(e.clientX);
+    },
+    onMouseMove: (e: React.MouseEvent) => {
+      handleMove(e.clientX, e.nativeEvent);
+    },
     onMouseUp: handleEnd,
     onMouseLeave: handleEnd,
   };

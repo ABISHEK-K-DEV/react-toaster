@@ -1,10 +1,9 @@
 import React from 'react';
-import { Toast, ToastTheme, ToastPosition } from '../types';
-import { getEffectiveTheme } from '../utils/themeUtils';
+import { Toast as ToastType, ToastPosition, ToastTheme } from '../types';
 import AdvancedToast from './AdvancedToast';
 
 interface AdvancedToastContainerProps {
-  toasts: Toast[];
+  toasts: ToastType[];
   theme: ToastTheme;
   onDismiss: (id: string) => void;
   onPause: (id: string) => void;
@@ -15,24 +14,26 @@ interface AdvancedToastContainerProps {
   newestOnTop?: boolean;
 }
 
-const getPositionClasses = (position: ToastPosition): string => {
+const getContainerClasses = (position: ToastPosition): string => {
+  const baseClasses = 'fixed z-[9999] flex flex-col gap-3 pointer-events-none p-4 max-w-md';
+
   switch (position) {
     case 'top-right':
-      return 'fixed top-4 right-4 z-50';
+      return `${baseClasses} top-0 right-0 items-end`;
     case 'top-left':
-      return 'fixed top-4 left-4 z-50';
+      return `${baseClasses} top-0 left-0 items-start`;
     case 'top-center':
-      return 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50';
+      return `${baseClasses} top-0 left-1/2 transform -translate-x-1/2 items-center`;
     case 'bottom-right':
-      return 'fixed bottom-4 right-4 z-50';
+      return `${baseClasses} bottom-0 right-0 items-end`;
     case 'bottom-left':
-      return 'fixed bottom-4 left-4 z-50';
+      return `${baseClasses} bottom-0 left-0 items-start`;
     case 'bottom-center':
-      return 'fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50';
+      return `${baseClasses} bottom-0 left-1/2 transform -translate-x-1/2 items-center`;
     case 'center':
-      return 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50';
+      return `${baseClasses} top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 items-center`;
     default:
-      return 'fixed top-4 right-4 z-50';
+      return `${baseClasses} top-0 right-0 items-end`;
   }
 };
 
@@ -44,47 +45,46 @@ const AdvancedToastContainer: React.FC<AdvancedToastContainerProps> = ({
   onResume,
   onUndo,
   onRetry,
-  containerClassName = '',
+  containerClassName,
   newestOnTop = true,
 }) => {
-  const effectiveTheme = getEffectiveTheme(theme);
-
   // Group toasts by position
-  const toastsByPosition = toasts.reduce((acc, toast) => {
-    const position = toast.config.position || 'top-right';
-    if (!acc[position]) {
-      acc[position] = [];
-    }
-    acc[position].push(toast);
-    return acc;
-  }, {} as Record<ToastPosition, Toast[]>);
+  const toastsByPosition = toasts.reduce(
+    (acc, toast) => {
+      const position = toast.config.position || 'top-right';
+      if (!acc[position]) {
+        acc[position] = [];
+      }
+      acc[position].push(toast);
+      return acc;
+    },
+    {} as Record<ToastPosition, ToastType[]>
+  );
 
   return (
     <>
-      {Object.entries(toastsByPosition).map(([position, positionToasts]) => (
-        <div
-          key={position}
-          className={`${getPositionClasses(position as ToastPosition)} flex flex-col gap-2 pointer-events-none ${containerClassName}`}
-          style={{
-            maxWidth: '420px',
-            width: '100%',
-          }}
-        >
-          {(newestOnTop ? [...positionToasts].reverse() : positionToasts).map((toast) => (
-            <div key={toast.id} className="pointer-events-auto">
-              <AdvancedToast
-                toast={toast}
-                theme={theme}
-                onDismiss={onDismiss}
-                onPause={onPause}
-                onResume={onResume}
-                onUndo={onUndo}
-                onRetry={onRetry}
-              />
+      {Object.entries(toastsByPosition).map(
+        ([position, positionToasts]) =>
+          positionToasts.length > 0 && (
+            <div
+              key={position}
+              className={`${getContainerClasses(position as ToastPosition)} ${containerClassName || ''}`}
+            >
+              {(newestOnTop ? [...positionToasts].reverse() : positionToasts).map((toast) => (
+                <AdvancedToast
+                  key={toast.id}
+                  toast={toast}
+                  theme={theme}
+                  onDismiss={onDismiss}
+                  onPause={onPause}
+                  onResume={onResume}
+                  onUndo={onUndo}
+                  onRetry={onRetry}
+                />
+              ))}
             </div>
-          ))}
-        </div>
-      ))}
+          )
+      )}
     </>
   );
 };

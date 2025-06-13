@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import './animations.css';
 
 .toaster-container {
   position: fixed;
@@ -10,6 +11,7 @@
   gap: 12px;
   pointer-events: none;
   padding: 16px;
+  max-width: 420px;
 }
 
 .toaster-container.top-right {
@@ -50,6 +52,13 @@
   align-items: center;
 }
 
+.toaster-container.center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  align-items: center;
+}
+
 .toast {
   pointer-events: auto;
   min-width: 320px;
@@ -63,6 +72,7 @@
   overflow: hidden;
   backdrop-filter: blur(10px);
   transition: all 0.2s ease-in-out;
+  user-select: none;
 }
 
 .toast:hover {
@@ -100,4 +110,39 @@
   background-size: 200% 100%;
   animation: shimmer 2s linear infinite;
   border-radius: 0 0 16px 16px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .toast::before {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .toast::before,
+  .toast-progress {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Focus styles for accessibility */
+.toast:focus-within {
+  outline: 2px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .toast {
+    border: 2px solid;
+  }
 }

@@ -13,6 +13,8 @@ export const getAnimationClass = (position: ToastPosition, isExiting: boolean): 
         return 'animate-slide-out-top';
       case 'bottom-center':
         return 'animate-slide-out-bottom';
+      case 'center':
+        return 'animate-fade-out';
       default:
         return 'animate-slide-out-right';
     }
@@ -28,6 +30,8 @@ export const getAnimationClass = (position: ToastPosition, isExiting: boolean): 
         return 'animate-slide-in-top';
       case 'bottom-center':
         return 'animate-slide-in-bottom';
+      case 'center':
+        return 'animate-fade-in';
       default:
         return 'animate-slide-in-right';
     }
@@ -46,6 +50,10 @@ export const getToastClasses = (type: ToastType): string => {
       return `${baseClasses} bg-gradient-to-r from-blue-50/90 via-cyan-50/90 to-blue-50/90 border-l-4 border-l-blue-500 text-blue-900 shadow-blue-500/20`;
     case 'warning':
       return `${baseClasses} bg-gradient-to-r from-amber-50/90 via-yellow-50/90 to-amber-50/90 border-l-4 border-l-amber-500 text-amber-900 shadow-amber-500/20`;
+    case 'loading':
+      return `${baseClasses} bg-gradient-to-r from-purple-50/90 via-indigo-50/90 to-purple-50/90 border-l-4 border-l-purple-500 text-purple-900 shadow-purple-500/20`;
+    case 'custom':
+      return `${baseClasses} bg-gradient-to-r from-gray-50/90 via-slate-50/90 to-gray-50/90 border-l-4 border-l-gray-500 text-gray-900 shadow-gray-500/20`;
     default:
       return `${baseClasses} bg-gradient-to-r from-gray-50/90 via-slate-50/90 to-gray-50/90 border-l-4 border-l-gray-500 text-gray-900 shadow-gray-500/20`;
   }
